@@ -1,0 +1,31 @@
+{
+  "atelier1": {
+    "1.1": "0c670b423210447f",
+    "1.2": "f931c1123bf52226",
+    "1.3": "3354a0576e6bb74f",
+    "1.4": "01c7412374f98c53",
+    "1.5": "3ec850d986fc6f53",
+    "1.6": "73b1f8d5f18841de"
+  },
+  "atelier2": {
+    "lignes": 4927,
+    "regions": {
+      "Occitanie": 1262,
+      "Hauts-de-France": 1224,
+      "IDF": 1221,
+      "Bretagne": 1220
+    },
+    "chiffre_affaires": 2469643.84,
+    "mars_bretagne": {
+      "nb_commandes": 194,
+      "taux_retour": 0.0979381443298969
+    }
+  },
+  "atelier6": {
+    "quantite": false,
+    "prix_unitaire": false,
+    "anciennete_mois": true,
+    "region": false,
+    "produit": true
+  }
+}

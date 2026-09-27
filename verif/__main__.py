@@ -1,0 +1,86 @@
+"""Point d'entrée :  python -m verif <numéro d'atelier | tout | note> [--json fichier]"""
+import json
+import os
+import sys
+import warnings
+
+from verif.outils import RACINE, Atelier, fmt, gras, vert
+
+AIDE = """Utilisation :
+  ./verifier.sh 0      vérifie l'atelier 0 (de 0 à 7)
+  ./verifier.sh tout   vérifie tous les ateliers et affiche la note automatique
+
+Pour l'enseignant (depuis un Codespace ouvert sur le dépôt d'origine) :
+  ./verifier.sh etudiants          corrige tous les forks et crée prof/notes.csv
+  ./verifier.sh etudiant <pseudo>  corrige le fork d'un étudiant et affiche le détail
+"""
+
+MANUEL = 3  # points notés par l'enseignant (décision atelier 6 + questions de réflexion)
+
+
+def executer(numero):
+    from verif.ateliers import ATELIERS
+    try:
+        return ATELIERS[numero]()
+    except Exception as e:  # le vérificateur ne doit jamais planter
+        a = Atelier(numero, "Erreur", {0: 0, 1: 1, 2: 4, 3: 3, 4: 3, 5: 3, 6: 1, 7: 2}[numero])
+        a.ko(f"Erreur inattendue pendant la vérification : {e!r}", points_max=a.bareme)
+        return a
+
+
+def resume_markdown(ateliers, total, maximum):
+    lignes = ["## Note automatique de l'atelier DataOps", "",
+              "| Atelier | Points | Détail |", "|---|---|---|"]
+    for a in ateliers:
+        details = "<br>".join(("✅ " if s == "ok" else "❌ " if s == "ko" else "ℹ️ ") + m
+                              for s, m, *_ in a.lignes)
+        lignes.append(f"| {a.numero}. {a.titre} | {fmt(a.points)} / {fmt(a.bareme)} | {details} |")
+    lignes += ["", f"**Total automatique : {fmt(total)} / {fmt(maximum)}** "
+                   f"(+ {MANUEL} points notés par l'enseignant)"]
+    return "\n".join(lignes)
+
+
+def main(argv):
+    warnings.filterwarnings("ignore")
+    os.chdir(RACINE)
+    sys.path.insert(0, str(RACINE))
+
+    cible = argv[0] if argv else "aide"
+    if cible.isdigit() and 0 <= int(cible) <= 7:
+        a = executer(int(cible))
+        a.afficher()
+        return 0
+    if cible not in ("tout", "note"):
+        print(AIDE)
+        return 0
+
+    ateliers = []
+    for n in range(8):
+        a = executer(n)
+        a.afficher()
+        ateliers.append(a)
+    total = sum(a.points for a in ateliers)
+    maximum = sum(a.bareme for a in ateliers)
+
+    print()
+    print(gras("━━━ Récapitulatif ━━━"))
+    for a in ateliers:
+        etat = vert("validé") if a.reussi else "à terminer"
+        bareme = f"{fmt(a.points):>4} / {fmt(a.bareme)}" if a.bareme else "   —    "
+        print(f"  Atelier {a.numero}  {a.titre:36} {bareme}   {etat}")
+    print(gras(f"\n  Note automatique : {fmt(total)} / {fmt(maximum)}"
+               f"   (+ {MANUEL} points notés par l'enseignant)"))
+
+    if os.environ.get("GITHUB_STEP_SUMMARY"):
+        with open(os.environ["GITHUB_STEP_SUMMARY"], "a", encoding="utf-8") as f:
+            f.write(resume_markdown(ateliers, total, maximum) + "\n")
+    if "--json" in argv:
+        chemin = argv[argv.index("--json") + 1]
+        with open(chemin, "w", encoding="utf-8") as f:
+            json.dump({"total": total, "maximum": maximum,
+                       "ateliers": {a.numero: a.points for a in ateliers}}, f)
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main(sys.argv[1:]))

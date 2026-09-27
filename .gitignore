@@ -1,0 +1,20 @@
+# Données générées (on les régénère avec scripts/generer_donnees.py)
+data/
+
+# MLflow : base locale et artefacts (la preuve à rendre est preuves/mlflow_runs.json)
+mlflow.db
+mlruns/
+mlartifacts/
+
+# Modèle exporté (régénéré avec python -m src.train --exporter)
+modeles/
+
+# Python
+__pycache__/
+*.pyc
+.pytest_cache/
+.venv/
+
+# Outils enseignant
+prof/notes.csv
+prof/_forks/

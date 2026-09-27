@@ -1,0 +1,13 @@
+.git
+.github
+.devcontainer
+data
+mlflow.db
+mlruns
+mlartifacts
+modeles
+preuves
+prof
+docs
+__pycache__
+.pytest_cache

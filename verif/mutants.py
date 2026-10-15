@@ -29,6 +29,3 @@ def pytest_configure(config):
             propre.iloc[:40, col] = propre["region"].iloc[:40].str.lower()
             return propre
         pipeline.normaliser = normaliser_mutant
-
-    elif mutant == "volume":
-        pipeline.nettoyer = lambda df: nettoyer(df).head(4000)

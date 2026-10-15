@@ -1,7 +1,6 @@
 # scripts/generer_donnees.py
 # Génère les données de l'atelier. NE PAS MODIFIER ce fichier.
-#   data/raw/ventes.csv       : export ERP "sale" (données d'entraînement)
-#   data/raw/ventes_prod.csv  : données de production dont la distribution a dérivé
+#   data/raw/ventes.csv : export ERP "sale" (doublons, prix manquants, quantités négatives…)
 import numpy as np
 import pandas as pd
 from pathlib import Path
@@ -41,5 +40,4 @@ def salir(df, seed=0):
 if __name__ == "__main__":
     Path("data/raw").mkdir(parents=True, exist_ok=True)
     salir(generer()).to_csv("data/raw/ventes.csv", index=False)
-    generer(n=2000, seed=15, drift=True).to_csv("data/raw/ventes_prod.csv", index=False)
-    print("Données générées : data/raw/ventes.csv et data/raw/ventes_prod.csv")
+    print("Données générées : data/raw/ventes.csv")

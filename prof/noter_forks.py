@@ -3,7 +3,6 @@
 À lancer depuis un Codespace ouvert sur le dépôt de l'enseignant :
     python prof/noter_forks.py                     # tous les forks
     python prof/noter_forks.py --etudiant pseudo   # un seul étudiant
-    python prof/noter_forks.py --sans-docker       # plus rapide, sans vérifier Docker
 
 Pour chaque fork, le script clone le dépôt de l'étudiant, remplace le vérificateur et le
 générateur de données par ceux de l'enseignant (un étudiant ne peut donc pas les truquer),
@@ -48,7 +47,7 @@ def nom_etudiant(dossier):
     return ""
 
 
-def noter(nom_complet, url_clone, sans_docker=False):
+def noter(nom_complet, url_clone):
     pseudo = nom_complet.split("/")[0]
     cible = DOSSIER / pseudo
     shutil.rmtree(cible, ignore_errors=True)
@@ -61,10 +60,7 @@ def noter(nom_complet, url_clone, sans_docker=False):
         (cible / fichier).parent.mkdir(parents=True, exist_ok=True)
         shutil.copy(RACINE / fichier, cible / fichier)
 
-    env = {**os.environ, "VERIF_MODE": "prof", "VERIF_DEPOT": nom_complet, "NO_COLOR": "1",
-           "MLFLOW_DISABLE_AGENT_HINT": "1"}
-    if sans_docker:
-        env["VERIF_SANS_DOCKER"] = "1"
+    env = {**os.environ, "VERIF_MODE": "prof", "VERIF_DEPOT": nom_complet, "NO_COLOR": "1"}
     subprocess.run([sys.executable, "scripts/generer_donnees.py"], cwd=cible, env=env, capture_output=True)
     resultat = cible / "note.json"
     execution = subprocess.run([sys.executable, "-m", "verif", "note", "--json", str(resultat)],
@@ -81,7 +77,6 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--depot", default=DEPOT_ENSEIGNANT, help="dépôt de l'enseignant")
     parser.add_argument("--etudiant", help="ne noter que le fork de ce pseudo GitHub")
-    parser.add_argument("--sans-docker", action="store_true", help="ne pas reconstruire les images Docker")
     args = parser.parse_args()
 
     DOSSIER.mkdir(parents=True, exist_ok=True)
@@ -100,13 +95,12 @@ def main():
         nom_complet = fork["full_name"]
         print(f"[{i}/{len(forks)}] {nom_complet} ...", end=" ", flush=True)
         try:
-            note = noter(nom_complet, fork["clone_url"], args.sans_docker)
+            note = noter(nom_complet, fork["clone_url"])
             print(f"{note['total']:g} / {note['maximum']:g}   {note['nom']}")
             lignes.append({"pseudo_github": fork["owner"]["login"], "nom": note["nom"],
                            "depot": fork["html_url"],
-                           **{f"atelier_{k}": v for k, v in note["ateliers"].items() if k != "0"},
-                           "total_auto_sur_17": note["total"],
-                           "manuel_sur_3": "", "note_sur_20": ""})
+                           **{f"atelier_{k}": v for k, v in note["ateliers"].items()},
+                           "note_sur_20": note["total"]})
         except Exception as e:
             print(f"ERREUR : {e}")
             lignes.append({"pseudo_github": fork["owner"]["login"], "depot": fork["html_url"],

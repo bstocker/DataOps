@@ -4,7 +4,6 @@
 # Enseignant :  ./verifier.sh etudiants          corrige tous les forks et crée prof/notes.csv
 #               ./verifier.sh etudiant <pseudo>  corrige le fork d'un étudiant et affiche le détail
 cd "$(dirname "$0")" || exit 1
-export MLFLOW_DISABLE_AGENT_HINT=1
 
 case "$1" in
   etudiants)

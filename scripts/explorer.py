@@ -18,10 +18,12 @@ print("1.2 Doublons :", df.duplicated().sum())
 print("1.3 Prix manquants :", df["prix_unitaire"].isna().sum())
 
 # TODO 1.4 : nombre de lignes dont la quantité est inférieure ou égale à 0
-#            (inspirez-vous de la ligne 1.3 et utilisez  df["quantite"] <= 0 )
+#            Il suffit d'enlever le # au début de la ligne ci-dessous :
+# print("1.4 Quantités <= 0 :", (df["quantite"] <= 0).sum())
 
 
 # TODO 1.5 : nombre de lignes dont le prix unitaire est inférieur ou égal à 0
+#            Même chose que 1.4, mais avec la colonne "prix_unitaire"
 
 
 # 1.6 Valeurs distinctes de la colonne region (les guillemets montrent les espaces cachés)

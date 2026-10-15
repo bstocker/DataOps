@@ -10,9 +10,6 @@ permissions:
   contents: read
   actions: read
 
-env:
-  MLFLOW_DISABLE_AGENT_HINT: "1"
-
 jobs:
   qualite:
     name: Tests de qualité des données

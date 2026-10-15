@@ -14,18 +14,6 @@
       "Hauts-de-France": 1224,
       "IDF": 1221,
       "Bretagne": 1220
-    },
-    "chiffre_affaires": 2469643.84,
-    "mars_bretagne": {
-      "nb_commandes": 194,
-      "taux_retour": 0.0979381443298969
     }
-  },
-  "atelier6": {
-    "quantite": false,
-    "prix_unitaire": false,
-    "anciennete_mois": true,
-    "region": false,
-    "produit": true
   }
 }

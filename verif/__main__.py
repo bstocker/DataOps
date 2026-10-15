@@ -6,24 +6,23 @@ import warnings
 
 from verif.outils import RACINE, Atelier, fmt, gras, vert
 
+NB_ATELIERS = 5
+
 AIDE = """Utilisation :
-  ./verifier.sh 0      vérifie l'atelier 0 (de 0 à 7)
-  ./verifier.sh tout   vérifie tous les ateliers et affiche la note automatique
+  ./verifier.sh 0      vérifie l'atelier 0 (de 0 à 4)
+  ./verifier.sh tout   vérifie tous les ateliers et affiche votre note sur 20
 
 Pour l'enseignant (depuis un Codespace ouvert sur le dépôt d'origine) :
   ./verifier.sh etudiants          corrige tous les forks et crée prof/notes.csv
   ./verifier.sh etudiant <pseudo>  corrige le fork d'un étudiant et affiche le détail
 """
 
-MANUEL = 3  # points notés par l'enseignant (décision atelier 6 + questions de réflexion)
-
-
 def executer(numero):
-    from verif.ateliers import ATELIERS
+    from verif.ateliers import ATELIERS, BAREME
     try:
         return ATELIERS[numero]()
     except Exception as e:  # le vérificateur ne doit jamais planter
-        a = Atelier(numero, "Erreur", {0: 0, 1: 1, 2: 4, 3: 3, 4: 3, 5: 3, 6: 1, 7: 2}[numero])
+        a = Atelier(numero, "Erreur", BAREME[numero])
         a.ko(f"Erreur inattendue pendant la vérification : {e!r}", points_max=a.bareme)
         return a
 
@@ -35,8 +34,7 @@ def resume_markdown(ateliers, total, maximum):
         details = "<br>".join(("✅ " if s == "ok" else "❌ " if s == "ko" else "ℹ️ ") + m
                               for s, m, *_ in a.lignes)
         lignes.append(f"| {a.numero}. {a.titre} | {fmt(a.points)} / {fmt(a.bareme)} | {details} |")
-    lignes += ["", f"**Total automatique : {fmt(total)} / {fmt(maximum)}** "
-                   f"(+ {MANUEL} points notés par l'enseignant)"]
+    lignes += ["", f"**Note : {fmt(total)} / {fmt(maximum)}**"]
     return "\n".join(lignes)
 
 
@@ -46,7 +44,7 @@ def main(argv):
     sys.path.insert(0, str(RACINE))
 
     cible = argv[0] if argv else "aide"
-    if cible.isdigit() and 0 <= int(cible) <= 7:
+    if cible.isdigit() and int(cible) in range(NB_ATELIERS):
         a = executer(int(cible))
         a.afficher()
         return 0
@@ -55,7 +53,7 @@ def main(argv):
         return 0
 
     ateliers = []
-    for n in range(8):
+    for n in range(NB_ATELIERS):
         a = executer(n)
         a.afficher()
         ateliers.append(a)
@@ -67,9 +65,8 @@ def main(argv):
     for a in ateliers:
         etat = vert("validé") if a.reussi else "à terminer"
         bareme = f"{fmt(a.points):>4} / {fmt(a.bareme)}" if a.bareme else "   —    "
-        print(f"  Atelier {a.numero}  {a.titre:36} {bareme}   {etat}")
-    print(gras(f"\n  Note automatique : {fmt(total)} / {fmt(maximum)}"
-               f"   (+ {MANUEL} points notés par l'enseignant)"))
+        print(f"  Atelier {a.numero}  {a.titre:32} {bareme}   {etat}")
+    print(gras(f"\n  Note : {fmt(total)} / {fmt(maximum)}"))
 
     if os.environ.get("GITHUB_STEP_SUMMARY"):
         with open(os.environ["GITHUB_STEP_SUMMARY"], "a", encoding="utf-8") as f:

@@ -141,7 +141,7 @@ def api_github(chemin):
 
 def lancer(commande, timeout=300, env=None):
     """Lance une commande depuis la racine du dépôt. Renvoie (code_retour, sortie)."""
-    env_complet = {**os.environ, "MLFLOW_DISABLE_AGENT_HINT": "1", **(env or {})}
+    env_complet = {**os.environ, **(env or {})}
     try:
         r = subprocess.run(commande, cwd=RACINE, capture_output=True, text=True,
                            timeout=timeout, env=env_complet)

@@ -1,28 +1,32 @@
-# Atelier 3 — Tester la qualité des données (20 min)
+# Atelier 3 — Tester la qualité des données (25 min)
 
-🎯 **Objectif** : écrire des tests automatiques qui **garantissent** la qualité des données à chaque exécution du pipeline.
+🎯 **Objectif** : écrire des **tests automatiques** qui sonnent l'alarme si les données ne sont plus propres.
 
 ---
 
-## 🧠 Le concept
+## 🧠 L'idée en une phrase
 
-Le fichier de demain peut contenir un nouveau défaut. Plutôt que de tout vérifier à la main, on écrit des **tests de qualité** : de petites fonctions qui vérifient une règle et échouent si elle n'est pas respectée. Les 5 grandes familles de contrôles :
+Un **test** est une **alarme** : une petite fonction qui vérifie une règle (« il n'y a pas de doublon ») et qui **échoue** si la règle n'est pas respectée. Demain, si le fichier contient une nouvelle erreur, l'alarme sonnera tout de suite.
 
-| Famille | Question posée | Test |
-|---|---|---|
-| **Schéma** | Les colonnes attendues sont-elles là ? | `test_schema` ✔️ fourni |
-| **Valeurs** | Les valeurs sont-elles dans les bornes ? | `test_valeurs` ✔️ fourni |
-| **Règle métier** | `montant = quantité × prix` ? | `test_regle_metier` ✔️ fourni |
-| **Unicité** | Chaque commande n'apparaît-elle qu'une fois ? | `test_unicite` ✍️ à écrire |
-| **Référentiel** | Les régions font-elles partie de la liste officielle ? | `test_regions` ✍️ à écrire |
-| **Volume** | Le nombre de lignes est-il plausible ? | `test_volume` ✍️ à écrire |
-
-Un test Python avec **pytest** est une fonction dont le nom commence par `test_` et qui contient des `assert` :
+Un test s'écrit comme ceci :
 
 ```python
-def test_exemple(df):
-    assert condition_qui_doit_etre_vraie
+def test_quelque_chose(df):
+    assert <ce qui doit être vrai>
 ```
+
+- le nom de la fonction commence par **`test_`** ;
+- `assert` veut dire « je vérifie que… ». Si ce n'est pas vrai, le test échoue.
+
+Le fichier contient déjà 3 tests. Vous allez en écrire 2 :
+
+| Test | Ce qu'il vérifie | |
+|---|---|---|
+| `test_schema` | toutes les colonnes sont présentes | ✔️ déjà écrit |
+| `test_valeurs` | quantités et prix sont positifs | ✔️ déjà écrit |
+| `test_regle_metier` | montant = quantité × prix | ✔️ déjà écrit |
+| `test_unicite` | aucune commande n'apparaît deux fois | ✍️ **à écrire** |
+| `test_regions` | toutes les régions sont dans la liste officielle | ✍️ **à écrire** |
 
 ---
 
@@ -34,45 +38,50 @@ def test_exemple(df):
 python -m pytest -v
 ```
 
-Les 3 tests fournis doivent être `PASSED` (en vert). Si ce n'est pas le cas, terminez d'abord l'atelier 2.
+Les 3 tests doivent afficher `PASSED` en vert. Sinon, terminez d'abord l'atelier 2.
 
-### 2. Écrire vos 3 tests
+### 2. Écrire vos 2 tests
 
-Ouvrez `tests/test_qualite.py` et remplacez les `TODO` :
+Ouvrez `tests/test_qualite.py`, descendez tout en bas et ajoutez sous les `TODO` :
 
-**TODO 3.1 — `test_unicite`** : aucune `commande_id` ne doit apparaître deux fois.
+**TODO 3.1** : chaque numéro de commande doit être unique.
 
 ```python
 def test_unicite(df):
     assert df["commande_id"].is_unique
 ```
 
-**TODO 3.2 — `test_regions`** : toutes les régions doivent appartenir à `REGIONS`.
+**TODO 3.2** : chaque région doit faire partie de la liste `REGIONS`.
 
-> 💡 `df["region"].isin(REGIONS)` donne `True`/`False` pour chaque ligne, et `.all()` vérifie que tout est `True`.
+```python
+def test_regions(df):
+    assert df["region"].isin(REGIONS).all()
+```
 
-**TODO 3.3 — `test_volume`** : entre 4 500 et 5 100 lignes après nettoyage. À vous de l'écrire entièrement.
+> 💡 `def` commence **tout à gauche**. La ligne `assert` commence par **4 espaces**.
 
-> 💡 Le nombre de lignes s'obtient avec `len(df)`. En Python, on peut écrire `a <= x <= b`.
+Relancez :
 
 ```bash
 python -m pytest -v
 ```
 
-Objectif : **6 passed**.
+Objectif : **5 passed**, tout en vert.
 
-### 3. Expérience : un test utile doit savoir échouer
+### 3. Expérience : faire sonner l'alarme
 
-1. Dans `src/pipeline.py`, désactivez la suppression des doublons en ajoutant un `#` devant la ligne :
+Un bon test doit savoir **échouer**. Vérifions-le :
+
+1. Dans `src/pipeline.py`, ajoutez un `#` devant la ligne qui supprime les doublons :
 
    ```python
-   # df = df.drop_duplicates()
+       # df = df.drop_duplicates()
    ```
 
-2. Relancez `python -m pytest -v`. Quel test passe au rouge (`FAILED`) ? Lisez le message d'erreur.
-3. **Retirez le `#`** pour remettre la ligne, puis relancez : tout redevient vert.
+2. Relancez `python -m pytest -v`. Quel test devient rouge (`FAILED`) ?
+3. **Enlevez le `#`** pour remettre la ligne, puis relancez : tout redevient vert.
 
-> 🔬 Le vérificateur fait la même expérience automatiquement : il introduit 3 bugs (des « mutants ») dans le pipeline et contrôle que **vos** tests les détectent.
+> 🔬 Le vérificateur fait la même expérience tout seul : il casse volontairement le pipeline et contrôle que **vos** tests le remarquent.
 
 ---
 
@@ -82,14 +91,14 @@ Objectif : **6 passed**.
 ./verifier.sh 3
 ```
 
-Objectif : **3 / 3**.
+Objectif : **5 / 5**.
 
-## 📝 Rendu
+## 💬 À discuter avec la classe
 
-- [ ] Capture d'écran de `python -m pytest -v` avec les 6 tests au vert, enregistrée dans `preuves/atelier3.png`
-- [ ] Question 3.1 de `RENDU.md`
-- [ ] **commit + push** (message : `Atelier 3 terminé`)
+Le code était juste à l'atelier 2. Pourquoi a-t-on quand même besoin de tests ? *(Indice : le fichier de demain sera différent.)*
 
-Sur github.com, onglet **Actions** : votre CI devrait maintenant passer au **vert** ✅.
+➡️ N'oubliez pas : **commit + push** (message : `Atelier 3`)
 
-➡️ Atelier suivant : [Atelier 4 — Suivre les expériences avec MLflow](04-mlflow.md)
+Sur github.com, onglet **Actions** : la dernière exécution devrait maintenant être **verte** ✅.
+
+➡️ Atelier suivant : [Atelier 4 — Le robot de vérification](04-ci.md)

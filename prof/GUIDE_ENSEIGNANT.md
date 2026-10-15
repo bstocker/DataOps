@@ -128,11 +128,7 @@ Pour corriger **un seul** étudiant et voir le détail à l'écran : `./verifier
 
 ---
 
-## 7. Pour aller plus loin : le niveau 2
-
-Une version plus avancée de l'atelier (3 h : suivi de modèles avec MLflow, Docker, détection de dérive, API) est conservée dans la branche **`niveau-2`** du dépôt. Elle s'adresse à des étudiants qui ont déjà fait ce niveau 1.
-
-### Modifier l'atelier (réservé au propriétaire du dépôt)
+## 7. Modifier l'atelier (réservé au propriétaire du dépôt)
 
 - **Si les données ou les réponses attendues changent** : mettre à jour `verif/attendus.json`.
 - **Si les étudiants ont déjà forké** : ils récupèrent les modifications sur leur fork avec **Sync fork** → **Update branch**, puis `git pull` dans le Codespace.
